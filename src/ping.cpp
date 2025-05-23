@@ -3,12 +3,21 @@
 
 int main(int argc, char * argv[])
 {
-  rclcpp::init(argc, argv);
-  auto pingNode = std::make_shared<PingNode>();
-  rclcpp::spin(pingNode);
-  pingNode->printResults();
-  rclcpp::shutdown();
-  return 0;
+    rclcpp::init(argc, argv);
+    auto pingNode = std::make_shared<PingNode>();
+    rclcpp::spin(pingNode);
+
+    pingNode->printResults();
+
+    if (argc > 1)
+    {
+        std::string logName(argv[1]);
+        pingNode->writeDataToFile(logName + ".csv");
+        pingNode->writeResultsToFile(logName + ".txt");
+    }
+
+    rclcpp::shutdown();
+    return 0;
 }
 
 /***********************************************************************************/
@@ -31,16 +40,22 @@ PingNode::PingNode()
 void PingNode::printResults()
 {
     std::cout << std::endl;
-    std::cout << "Messages sent:     " << measurement_.getDataNum() << std::endl;
-    std::cout << "Messages received: " << measurement_.getReceivedNum() << std::endl;
-    std::cout << "Message loss rate: " << measurement_.getLostRate()*100 << "%" << std::endl;
-    std::cout << "Roundtrip delay:" << std::endl;
-    std::cout << "      - average:   " << measurement_.getAvgDelay() << " ms" << std::endl;
-    std::cout << "      - std. dev.: " << measurement_.getDelayStdDev() << " ms" << std::endl;
-    std::cout << "      - min:       " << measurement_.getMinDelay() << " ms" << std::endl;
-    std::cout << "      - max:       " << measurement_.getMaxDelay() << " ms" << std::endl << std::endl;;
-
+    measurement_.printStatistics();
+    std::cout << std::endl;
 }
+
+
+void PingNode::writeResultsToFile(std::string filename)
+{
+    measurement_.writeStatisticsToFile(filename);
+}
+
+
+void PingNode::writeDataToFile(std::string filename)
+{
+    measurement_.writeRawDataToFile(filename);
+}
+
 
 void PingNode::timer_callback()
 {
@@ -57,6 +72,7 @@ void PingNode::timer_callback()
         measurement_.addData(dataPoint);
     }
 }
+
 
 void PingNode::pong_callback(const std_msgs::msg::String & msg)
 {

@@ -5,7 +5,9 @@
 #include <cmath>
 #include <cassert>
 #include <vector>
-
+#include <iostream>
+#include <fstream>
+#include <filesystem>
 
 using namespace std;
 
@@ -51,6 +53,10 @@ class Measurement
         double getMinDelay();
         double getAvgDelay();
         double getDelayStdDev();
+
+        void writeRawDataToFile(std::string filename);
+        void writeStatisticsToFile(std::string filename);
+        void printStatistics();
 
     private:
         std::vector<MeasurementData> data;

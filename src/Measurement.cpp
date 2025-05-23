@@ -31,7 +31,10 @@ double MeasurementData::getDelayMs()
     {
         return std::numeric_limits<double>::infinity();
     }
-    return (double)chrono::duration_cast<chrono::milliseconds>(receivedTime - sentTime).count();
+
+    std::chrono::duration<double, std::milli> delayMs = receivedTime - sentTime;
+
+    return delayMs.count();
 }
 
 
@@ -139,4 +142,53 @@ double Measurement::getDelayStdDev()
     }
 
     return sqrt(meanDevSum / validNum);
+}
+
+void Measurement::writeRawDataToFile(std::string filename)
+{
+    auto logFile = make_unique<std::ofstream>(filename);
+    chrono::high_resolution_clock::time_point timeReference;
+    bool referenceSet = false;
+
+    *logFile << "message,timestamp (ms),delay (ms)" << std::endl;
+
+    for (auto d : data)
+    {
+        if (d.isReceived())
+        {
+            if (!referenceSet)
+            {
+                timeReference = d.getReceivedTime();
+                referenceSet = true;
+            }
+            std::chrono::duration<double, std::milli> timestamp = d.getReceivedTime() - timeReference;
+            *logFile << d.getMessage() << "," << timestamp.count() << "," << d.getDelayMs() << std::endl;
+        }
+    }
+}
+
+void Measurement::writeStatisticsToFile(std::string filename)
+{
+    auto logFile = make_unique<std::ofstream>(filename);
+
+    *logFile << "Messages sent:     " << getDataNum() << std::endl;
+    *logFile << "Messages received: " << getReceivedNum() << std::endl;
+    *logFile << "Message loss rate: " << getLostRate()*100 << " %" << std::endl;
+    *logFile << "Roundtrip delay:" << std::endl;
+    *logFile << "      - average:   " << getAvgDelay() << " ms" << std::endl;
+    *logFile << "      - std. dev.: " << getDelayStdDev() << " ms" << std::endl;
+    *logFile << "      - min:       " << getMinDelay() << " ms" << std::endl;
+    *logFile << "      - max:       " << getMaxDelay() << " ms" << std::endl;
+}
+
+void Measurement::printStatistics()
+{
+    std::cout << "Messages sent:     " << getDataNum() << std::endl;
+    std::cout << "Messages received: " << getReceivedNum() << std::endl;
+    std::cout << "Message loss rate: " << getLostRate()*100 << " %" << std::endl;
+    std::cout << "Roundtrip delay:" << std::endl;
+    std::cout << "      - average:   " << getAvgDelay() << " ms" << std::endl;
+    std::cout << "      - std. dev.: " << getDelayStdDev() << " ms" << std::endl;
+    std::cout << "      - min:       " << getMinDelay() << " ms" << std::endl;
+    std::cout << "      - max:       " << getMaxDelay() << " ms" << std::endl;
 }

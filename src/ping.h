@@ -20,6 +20,8 @@ class PingNode : public rclcpp::Node
     public:
         PingNode();
         void printResults();
+        void writeResultsToFile(std::string filename);
+        void writeDataToFile(std::string filename);
 
     private:
         void timer_callback();
