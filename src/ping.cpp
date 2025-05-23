@@ -59,11 +59,16 @@ void PingNode::writeDataToFile(std::string filename)
 
 void PingNode::timer_callback()
 {
-    if (active_)
+    auto message = std_msgs::msg::String();
+    if (!active_)
     {
-        auto message = std_msgs::msg::String();
+        message.data = std::to_string(count_);
+        ping_publisher_->publish(message);
+
+    }
+    else
+    {
         message.data = std::to_string(count_++);
-        //RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
 
         chrono::high_resolution_clock::time_point sentTime = chrono::high_resolution_clock::now();
         ping_publisher_->publish(message);
@@ -78,7 +83,7 @@ void PingNode::pong_callback(const std_msgs::msg::String & msg)
 {
     chrono::high_resolution_clock::time_point receivedTime = chrono::high_resolution_clock::now();
 
-    if (msg.data == "Pong ready")
+    if (!active_)
     {
         active_ = true;
         RCLCPP_INFO(this->get_logger(), "pong_node detected");

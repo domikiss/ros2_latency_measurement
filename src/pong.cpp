@@ -18,24 +18,9 @@ PongNode::PongNode()
                 "ping", 10, std::bind(&PongNode::ping_callback, this, _1));
     pong_publisher_ = this->create_publisher<std_msgs::msg::String>("pong", 10);
 
-    timer_ = this->create_wall_timer(3s, std::bind(&PongNode::timer_callback, this));
-
-    auto message = std_msgs::msg::String();
-    message.data = "Pong ready";
-    pong_publisher_->publish(message);
     RCLCPP_INFO(this->get_logger(), "Waiting for ping_node...");
 }
 
-void PongNode::PongNode::timer_callback()
-{
-    if (waitForPingNode_)
-    {
-        auto message = std_msgs::msg::String();
-        message.data = "Pong ready";
-        pong_publisher_->publish(message);
-        RCLCPP_INFO(this->get_logger(), "Waiting for ping_node...");
-    }
-}
 
 void PongNode::ping_callback(const std_msgs::msg::String & msg)
 {

@@ -12,7 +12,6 @@ class PongNode : public rclcpp::Node
         PongNode();
 
     private:
-        void timer_callback();
         void ping_callback(const std_msgs::msg::String & msg);
 
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr ping_subscriber_;
