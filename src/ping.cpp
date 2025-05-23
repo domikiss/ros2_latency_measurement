@@ -86,7 +86,7 @@ void PingNode::pong_callback(const std_msgs::msg::String & msg)
     if (!active_)
     {
         active_ = true;
-        RCLCPP_INFO(this->get_logger(), "pong_node detected");
+        RCLCPP_INFO(this->get_logger(), "pong_node detected.");
     }
     else
     {
